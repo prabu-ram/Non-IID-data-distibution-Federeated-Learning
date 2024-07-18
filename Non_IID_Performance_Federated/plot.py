@@ -1,5 +1,5 @@
-import numpy as np
 import matplotlib.pyplot as plt
+import seaborn as sns
 
 
 def count_class_samples(client_datasets, num_classes):
@@ -11,21 +11,27 @@ def count_class_samples(client_datasets, num_classes):
 
     return client_class_counts
 
-def plot_class_distribution(client_class_counts, num_classes, title):
-    num_clients = len(client_class_counts)
-    fig, ax = plt.subplots(figsize=(12, 6))
+import pandas as pd
 
-    bar_width = 0.35
-    index = np.arange(num_classes)
+def display_class_distribution_heatmap(client_class_counts, num_classes, title):
+    # Create a DataFrame from the client class counts
+    df = pd.DataFrame(client_class_counts).T
+    df.columns = [f'Class_{i}' for i in range(num_classes)]
     
-    for i, (client, counts) in enumerate(client_class_counts.items()):
-        ax.bar(index + i * bar_width, counts, bar_width, label=client)
+    # Add a total column
+    df['Total'] = df.sum(axis=1)
+    
+    # Plot the heatmap
+    plt.figure(figsize=(12, 8))
+    sns.heatmap(df, annot=True, cmap="YlGnBu", fmt='d')
+    plt.title(title)
+    plt.show()
 
-    ax.set_xlabel('Class')
-    ax.set_ylabel('Number of samples')
-    ax.set_title(title)
-    ax.set_xticks(index + bar_width * (num_clients - 1) / 2)
-    ax.set_xticklabels([str(i) for i in range(num_classes)])
-    ax.legend()
-
+def plot_accuracies(batch_sizes, accuracies):
+    for batch_size, accuracy in zip(batch_sizes, accuracies):
+        plt.plot(range(1, len(accuracy)+1), accuracy, label=f'alpha = {batch_size}')
+    plt.xlabel('Epochs')
+    plt.ylabel('Accuracy (%)')
+    plt.title('Federated Learning Accuracy for Different alpha (Dirichlit)')
+    plt.legend()
     plt.show()
